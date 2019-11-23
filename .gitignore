@@ -1,5 +1,6 @@
 node_modules
 db/db.bin
 out/*
-.vscode/*
 samples/*
+*.ppk
+*.ppk.pub

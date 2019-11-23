@@ -1,10 +1,10 @@
 // importing the dependencies
-import * as express from 'express';
+import express = require('express');
+import helmet = require('helmet');
+import cors = require('cors');
+import morgan = require('morgan');
+import sqlite3 = require('sqlite3');
 //const bodyParser = require('body-parser');
-import * as cors from 'cors';
-import * as helmet from 'helmet';
-import * as morgan from 'morgan';
-import * as sqlite3 from 'sqlite3';
 import * as fetch from 'node-fetch';
 import { linkSync } from 'fs';
 
@@ -24,14 +24,14 @@ app.get('/', (req, res) => {
   res.send("hello");
 });
 
-app.post('/reddit',  (req, res) => {
-  // getRedditComments("https://reddit.com/r/PublicFreakout/comments/dyr4nn/racist_woman_stops_a_man_and_his_kids_from_seeing").then( (result) => {
-  //   res.send(result);
-  // });
-  // getRedditList("https://www.reddit.com/r/AmItheAsshole/top.json?t=week").then( (result) => {
-  //   res.send(result);
-  // });
+app.post('/subreddit',  (req, res) => {
+  getRedditList(req.query.url).then( (result) => {
+       res.send(result);
+     });;
 
+});
+
+app.post('/reddit',  (req, res) => {
   traverseSubreddits().then( (result) => {
        res.send(result);
      });;
@@ -61,6 +61,15 @@ app.listen(3050, () => {
     return results;
 }
 
+function countReplies(replies, cntObj) {
+  replies.forEach((reply) => {
+    cntObj.cnt += 1;
+    if(reply["data"] && reply.data["replies"] && reply.data.replies["data"] && reply.data.replies.data["children"])
+      countReplies(reply.data.replies.data.children, cntObj);
+  });
+  return cntObj.cnt;
+}
+
 async function getRedditComments(url) {
   let results = "";
   try {
@@ -73,7 +82,9 @@ async function getRedditComments(url) {
       if( score <= threshold ) { 
         links.push( comment.data.permalink );
         const data = await getCommentData(comment.data.permalink);
-        insertLinkToDB(url, comment.data.permalink, JSON.stringify(data), "RECORDED", score);
+        const replies = data[1].data.children[0].data.replies.data.children;
+        const count = countReplies(replies, {cnt: 0});
+        insertLinkToDB(url, comment.data.permalink, JSON.stringify(data), "RECORDED", score, count);
       }
     });
     return links;
@@ -95,9 +106,9 @@ async function getCommentData(permaLink) {
   }
 }
 
-async function insertLinkToDB(srLink, link, data, status, score) {
-  let query = `INSERT OR REPLACE INTO DATA ("LINK", "DATA", "STATUS", "DATALINK", "SCORE") VALUES (?, ?, ?, ?, ?)`;
-  const stmt = db.run(query, [link, data, status, srLink, score], function(err) {
+async function insertLinkToDB(srLink, link, data, status, score, comments) {
+  let query = `INSERT OR REPLACE INTO DATA ("LINK", "DATA", "STATUS", "DATALINK", "SCORE", "COMMENTS") VALUES (?, ?, ?, ?, ?, ?)`;
+  const stmt = db.run(query, [link, data, status, srLink, score, comments], function(err) {
     console.log(err);
   });
   return stmt;

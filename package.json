@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.ts",
   "dependencies": {
+    "@types/express": "^4.17.2",
     "@types/node": "^12.12.11",
     "Promise": "^1.0.5",
     "cors": "^2.8.5",
@@ -18,11 +19,8 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node app.ts"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dustingibson/reddit2speech.git"
+    "start": "tsc -p . && node out/app.js",
+    "build": "tsc -p ."
   },
   "author": "",
   "license": "ISC",
