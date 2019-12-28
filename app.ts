@@ -64,10 +64,10 @@ app.post('/postthread', async (req, res) => {
   const title = `[${subreddit}] "${comment}..."`;
   const r = new snoowrap({
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
-    clientId: 'Qe2M9w6z9mXwQg',
-    clientSecret: 'WX7o-hxXYdY-mCNS6C1444R2OLI',
-    username: 'reddit_drama_bot',
-    password: 'readme123'
+    clientId: config.clientid,
+    clientSecret: config.secret,
+    username: config.username,
+    password: config.password
   });
   r.getSubreddit('RedditDramaBot').submitLink({
     title: title,
@@ -75,6 +75,8 @@ app.post('/postthread', async (req, res) => {
   });
   res.send(title);
 });
+
+app.post('/a')
 
 app.post('/subreddit',  (req, res) => {
   try {
