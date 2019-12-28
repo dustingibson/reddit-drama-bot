@@ -4,3 +4,5 @@ out/*
 samples/*
 *.ppk
 *.ppk.pub
+*.bat
+config.json
