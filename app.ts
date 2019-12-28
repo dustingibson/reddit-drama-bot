@@ -76,8 +76,6 @@ app.post('/postthread', async (req, res) => {
   res.send(title);
 });
 
-app.post('/a')
-
 app.post('/subreddit',  (req, res) => {
   try {
   getRedditList(req.query.url).then( (result) => {
