@@ -154,7 +154,7 @@ async function getRedditComments(url) {
             const ogComment = comment.data.body;
             //let count = 0;
             let count = naiveCountReplies(JSON.stringify(data));
-            if( (score <= threshold && count >= minCommentsWithThreshold) || (score <= thresholdWithComments && count >= minComments) ) { 
+            if( ogComment !== "[deleted]" && ogComment !== "[removed]" && (score <= threshold && count >= minCommentsWithThreshold) || (score <= thresholdWithComments && count >= minComments) ) { 
               links.push( comment.data.permalink );
               insertLinkToDB(url, "https://reddit.com" +  comment.data.permalink, ogComment, "RECORDED", score, count);
             }
