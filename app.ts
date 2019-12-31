@@ -138,7 +138,8 @@ async function getRedditComments(url) {
     const result = await fetch(url);
     const response = await result.json(url);
     const comments = response[1].data.children;
-    comments.forEach( async (comment) => {
+    await Promise.all(
+    comments.map( async (comment) => {
       try {
         if(comment["data"] != undefined && comment.data["permalink"] != undefined) {
           const score = comment.data.score;
@@ -157,7 +158,7 @@ async function getRedditComments(url) {
       } catch(err) {
         console.log("Error getting comments");
       }
-    });
+    }));
     return "";
   } catch(err) {
     return "";
@@ -225,6 +226,8 @@ async function getRedditList(url) {
     if (!exists) {
       //Get comments
       comments.push(await getRedditComments(redditLink));
+      comments.push(await getRedditComments(redditLink + "&sorted=controversial"));
+
     }
   }));
   return "";
