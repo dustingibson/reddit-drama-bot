@@ -10,12 +10,6 @@ import { linkSync } from 'fs';
 const snoowrap = require('snoowrap');
 import * as config from './config.json';
 
-
-const threshold = -40;
-const thresholdWithComments = 10;
-const minComments = 30;
-const minCommentsWithThreshold = 10;
-
 let db = new sqlite3.Database('./db/db.bin');
 
 const app = express();
@@ -148,13 +142,13 @@ async function getRedditComments(url) {
       try {
         if(comment["data"] != undefined && comment.data["permalink"] != undefined) {
           const score = comment.data.score;
-          if( comment.data.replies != "" && score <= thresholdWithComments && score != 0 && score != 1 )
+          if( comment.data.replies != "" && score <= config.thresholdWithComments && score != 0 && score != 1 )
           {
             const data = await getCommentData(comment.data.permalink);
             const ogComment = comment.data.body;
             //let count = 0;
             let count = naiveCountReplies(JSON.stringify(data));
-            if( ogComment !== "[deleted]" && ogComment !== "[removed]" && (score <= threshold && count >= minCommentsWithThreshold) || (score <= thresholdWithComments && count >= minComments) ) { 
+            if( ogComment !== "[deleted]" && ogComment !== "[removed]" && (score <= config.threshold && count >= config.minCommentsWithThreshold) || (score <= config.thresholdWithComments && count >= config.minComments) ) { 
               links.push( comment.data.permalink );
               insertLinkToDB(url, "https://reddit.com" +  comment.data.permalink, ogComment, "RECORDED", score, count);
             }
