@@ -107,6 +107,7 @@ function getSubredditFromLink(link) {
       db.all("SELECT LINK AS link FROM SUBREDDITS WHERE ACTIVE='Y'", function(err, rows) {
         rows.forEach( async (row) => { 
           links.push(`https://www.reddit.com/r/${row.link}/top.json?t=week`);
+          links.push(`https://www.reddit.com/r/${row.link}/top.json?t=today`);
           links.push(`https://www.reddit.com/r/${row.link}/controversial.json?t=week`);
 
         });
