@@ -150,13 +150,14 @@ async function getRedditComments(url) {
           const score = comment.data.score;
           if( comment.data.replies != "" && score <= config.thresholdWithComments && score != 0 && score != 1 )
           {
+            console.log("Potential comment found");
             const data = await getCommentData(comment.data.permalink);
             const ogComment = comment.data.body;
             //let count = 0;
             let count = naiveCountReplies(JSON.stringify(data));
             if( ogComment !== "[deleted]" && ogComment !== "[removed]" && (score <= config.threshold && count >= config.minCommentsWithThreshold) || (score <= config.thresholdWithComments && count >= config.minComments) ) { 
               links.push( comment.data.permalink );
-              insertLinkToDB(url, "https://reddit.com" +  comment.data.permalink, ogComment, "RECORDED", score, count);
+              await insertLinkToDB(url, "https://reddit.com" +  comment.data.permalink, ogComment, "RECORDED", score, count);
             }
           }
         }
@@ -229,6 +230,7 @@ async function getRedditList(url) {
     const exists = await linkExists(redditLink);
     
     if (!exists) {
+      console.log("Find comments on: " + redditLink);
       //Get comments
       comments.push(await getRedditComments(redditLink));
     }
