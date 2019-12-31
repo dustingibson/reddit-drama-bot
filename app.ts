@@ -83,6 +83,7 @@ app.post('/subreddit',  (req, res) => {
 
 app.post('/reddit',  (req, res) => {
   try {
+    console.log("Getting Subreddit List");
     traverseSubreddits().then( (result) => {
         res.send(result);
       });;
@@ -114,6 +115,7 @@ function getSubredditFromLink(link) {
     });
     let results = [];
     await Promise.all( links.map( async (link) => {
+      console.log("Checking " + link);
       const result = await getRedditList(link);
       results.push(result);
     }));
@@ -168,8 +170,8 @@ async function getRedditComments(url) {
 }
 
 async function getCommentData(permaLink) {
+  const url = "https://reddit.com" + permaLink.substr(0, permaLink.length-1) + ".json";
   try {
-    const url = "https://reddit.com" + permaLink.substr(0, permaLink.length-1) + ".json";
     const result = await fetch(url);
     try {
       const response = await result.json();
@@ -180,7 +182,7 @@ async function getCommentData(permaLink) {
     }
   }
   catch(err) {
-    console.log("Error retrieving reddit comment JSON");
+    console.log(err);
     return [];
   }
 }
