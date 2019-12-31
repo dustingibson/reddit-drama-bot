@@ -105,7 +105,9 @@ function getSubredditFromLink(link) {
     const prom = await new Promise(function (resolve, reject) {
       db.all("SELECT LINK AS link FROM SUBREDDITS WHERE ACTIVE='Y'", function(err, rows) {
         rows.forEach( async (row) => { 
-          links.push(row.link);
+          links.push(`https://www.reddit.com/r/${row.link}/top.json?t=week`);
+          links.push(`https://www.reddit.com/r/${row.link}/controversial.json?t=week`);
+
         });
         resolve(links);
       })
@@ -188,12 +190,12 @@ async function insertLinkToDB(srLink, link, data, status, score, comments) {
   let error = false;
   let query = `INSERT OR REPLACE INTO DATA ("LINK", "DATA", "STATUS", "DATALINK", "SCORE", "COMMENTS") VALUES (?, ?, ?, ?, ?, ?)`;
   db.run(query, [link, data, status, srLink, score, comments], function(err) {
-    console.log("Error inserting " + query);
+    console.log("INSERTING...");
     error = true;
   });
   if(error) {
       db.run(query, [link, "{}", status, srLink, score, comments], function(err) {
-        console.log("Still error inserting");
+        console.log("RETRYING INSERT...");
     });
   }
 }
@@ -226,8 +228,6 @@ async function getRedditList(url) {
     if (!exists) {
       //Get comments
       comments.push(await getRedditComments(redditLink));
-      comments.push(await getRedditComments(redditLink + "&sorted=controversial"));
-
     }
   }));
   return "";
