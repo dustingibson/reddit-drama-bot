@@ -6,3 +6,4 @@ samples/*
 *.ppk.pub
 *.bat
 config.json
+sr.txt
