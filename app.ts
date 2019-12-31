@@ -143,18 +143,17 @@ async function getRedditComments(url) {
     const result = await fetch(url);
     const response = await result.json(url);
     const comments = response[1].data.children;
-    await Promise.all(
     comments.map( async (comment) => {
       try {
         if(comment["data"] != undefined && comment.data["permalink"] != undefined) {
           const score = comment.data.score;
           if( comment.data.replies != "" && score <= config.thresholdWithComments && score != 0 && score != 1 )
           {
-            console.log("Potential comment found");
             const data = await getCommentData(comment.data.permalink);
             const ogComment = comment.data.body;
             //let count = 0;
             let count = naiveCountReplies(JSON.stringify(data));
+            console.log("Comment checked");
             if( ogComment !== "[deleted]" && ogComment !== "[removed]" && (score <= config.threshold && count >= config.minCommentsWithThreshold) || (score <= config.thresholdWithComments && count >= config.minComments) ) { 
               links.push( comment.data.permalink );
               await insertLinkToDB(url, "https://reddit.com" +  comment.data.permalink, ogComment, "RECORDED", score, count);
@@ -164,7 +163,7 @@ async function getRedditComments(url) {
       } catch(err) {
         console.log("Error getting comments");
       }
-    }));
+    });
     return "";
   } catch(err) {
     return "";
