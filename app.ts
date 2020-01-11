@@ -222,19 +222,24 @@ async function getRedditList(url) {
   const comments = [];
   for(let redditThread of response.data.children) 
   {
-    //Get reddit link
-    let redditLink = "https://reddit.com" + redditThread.data.permalink;
-    
-    //Sort by controversial
-    redditLink = redditLink.substr(0, redditLink.length-1) + ".json?sort=controversial";
+    try {
+      //Get reddit link
+      let redditLink = "https://reddit.com" + redditThread.data.permalink;
+      
+      //Sort by controversial
+      redditLink = redditLink.substr(0, redditLink.length-1) + ".json?sort=controversial";
 
-    //Look if it's already done
-    const exists = await linkExists(redditLink);
-    
-    if (!exists) {
-      console.log("Find comments on: " + redditLink);
-      //Get comments
-      comments.push(await getRedditComments(redditLink));
+      //Look if it's already done
+      const exists = await linkExists(redditLink);
+      
+      if (!exists) {
+        console.log("Find comments on: " + redditLink);
+        //Get comments
+        comments.push(await getRedditComments(redditLink));
+      }
+    }
+    catch(err) {
+      console.log(err);
     }
   }
   return "";
