@@ -73,9 +73,9 @@ app.post('/postthread', async (req, res) => {
 app.post('/subreddit', async (req, res) => {
   try {
     let links = [];
-    await getRedditList(`https://www.reddit.com/r/${req.query.name}/top.json?t=week`);
-    await getRedditList(`https://www.reddit.com/r/${req.query.name}/top.json?t=today`);
-    await getRedditList(`https://www.reddit.com/r/${req.query.name}/controversial.json?t=week`);
+    await getRedditList(`https://www.reddit.com/r/${req.query.name}/${req.query.cat}.json?t=${req.query.time}`);
+    await getRedditList(`https://www.reddit.com/r/${req.query.name}/${req.query.cat}.json?t=${req.query.time}`);
+    await getRedditList(`https://www.reddit.com/r/${req.query.name}/${req.query.cat}.json?t=${req.query.time}`);
     res.send("Pass");
   }
   catch(err) {
@@ -145,8 +145,8 @@ async function getRedditComments(url) {
     const result = await fetch(url);
     const response = await result.json(url);
     const comments = response[1].data.children;
-    await Promise.all(
-    comments.map( async (comment) => {
+    for( let comment of comments )
+    {
       try {
         if(comment["data"] != undefined && comment.data["permalink"] != undefined) {
           const score = comment.data.score;
@@ -156,7 +156,6 @@ async function getRedditComments(url) {
             const ogComment = comment.data.body;
             //let count = 0;
             let count = naiveCountReplies(JSON.stringify(data));
-            console.log("Checking comment");
             if( ogComment !== "[deleted]" && ogComment !== "[removed]" && (score <= config.threshold && count >= config.minCommentsWithThreshold) || (score <= config.thresholdWithComments && count >= config.minComments) ) { 
               links.push( comment.data.permalink );
               await insertLinkToDB(url, "https://reddit.com" +  comment.data.permalink, ogComment, "RECORDED", score, count);
@@ -166,7 +165,7 @@ async function getRedditComments(url) {
       } catch(err) {
         console.log("Error getting comments");
       }
-    }));
+    }
     return "";
   } catch(err) {
     return "";
@@ -221,7 +220,8 @@ async function getRedditList(url) {
   const result = await fetch(url);
   const response = await result.json();
   const comments = [];
-  await Promise.all( response.data.children.map(async (redditThread) => {
+  for(let redditThread of response.data.children) 
+  {
     //Get reddit link
     let redditLink = "https://reddit.com" + redditThread.data.permalink;
     
@@ -236,6 +236,6 @@ async function getRedditList(url) {
       //Get comments
       comments.push(await getRedditComments(redditLink));
     }
-  }));
+  }
   return "";
 }
