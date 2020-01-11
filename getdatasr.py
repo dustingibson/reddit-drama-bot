@@ -1,18 +1,16 @@
 import requests 
 
-SRs = open('sr.txt').readlines()
-
-for SR in SRs:
+def callMethod(URL):
     try:
-        print("Get " + SR)
-        URL = "http://localhost:3110/subreddit?name=" + SR.strip() + "&cat=top&time=week"
-        r = requests.post(url = URL) 
-        print(r)
-        URL = "http://localhost:3110/subreddit?name=" + SR.strip() + "&cat=top&time=today"
-        r = requests.post(url = URL) 
-        print(r)
-        URL = "http://localhost:3110/subreddit?name=" + SR.strip() + "&cat=controversial&time=today"
+        print("Get " + URL)
         r = requests.post(url = URL) 
         print(r)
     except:
-        print("Error")
+        print("error")
+
+SRs = open('sr.txt').readlines()
+
+for SR in SRs:
+    callMethod("http://localhost:3110/subreddit?name=" + SR.strip() + "&cat=top&time=week")
+    callMethod("http://localhost:3110/subreddit?name=" + SR.strip() + "&cat=top&time=today")
+    callMethod("http://localhost:3110/subreddit?name=" + SR.strip() + "&cat=controversial&time=today")
