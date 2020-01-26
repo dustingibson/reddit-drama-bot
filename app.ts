@@ -274,9 +274,10 @@ async function executeQuery(keyword, subReddit, date, sort, sortOrder, limit, of
   let query = '';
   subReddit = subReddit.toLowerCase();
   let keywordQuery = `DATA LIKE '%${keyword}%'`;
-  let subredditQuery = `SUBREDDIT='${subReddit}'`;
+  let subredditQuery = `LOWER(SUBREDDIT)='${subReddit}'`;
   let whereList = [];
   let whereStr = '';
+  whereList.push(" DATA <>'[removed]' AND DATA <> '[deleted] '");
   if(keyword && keyword !== ' ' && keyword !== '')
     whereList.push(keywordQuery);
   if(subReddit && subReddit !== 'all')
