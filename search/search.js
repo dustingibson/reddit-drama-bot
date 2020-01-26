@@ -2,7 +2,9 @@ var baseAPI = "http://dustingibson.com/api/";
 
 function toDate(ts) {
     var date = new Date(ts * 1000);
-    return (date.getMonth() + 1) + "/" + (date.getDay() + 1) + "/" + date.getFullYear();
+    var day = (date.getDate()+1).toString();
+    var month = (date.getMonth() + 1).toString();
+    return  month + "/" + day + "/" + date.getFullYear();
 }
 
 $(document).ready( function () {
@@ -23,9 +25,7 @@ $(document).ready( function () {
         ] 
     });
     $.get(`${baseAPI}/subredditlist`, function(res) {
-        console.log(res);
         for(var i=0; i < res.length; i++) {
-            console.log(res[i]);
              $("#subredditSearch").append(new Option(res[i].SUBREDDIT, res[i].SUBREDDIT));
         }
     });

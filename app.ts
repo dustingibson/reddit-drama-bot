@@ -274,7 +274,7 @@ async function executeQuery(keyword, subReddit, date, sort, sortOrder, limit, of
   let query = '';
   subReddit = subReddit.toLowerCase();
   let keywordQuery = `DATA LIKE '%${keyword}%'`;
-  let subredditQuery = `LOWER(LINK) LIKE '%${subReddit}%'`;
+  let subredditQuery = `SUBREDDIT='${subReddit}'`;
   let whereList = [];
   let whereStr = '';
   if(keyword && keyword !== ' ' && keyword !== '')
