@@ -9,6 +9,8 @@ import * as fetch from 'node-fetch';
 import { linkSync } from 'fs';
 const snoowrap = require('snoowrap');
 import * as config from './config.json';
+var path = require('path');
+
 
 let db = new sqlite3.Database('./db/db.bin');
 
@@ -19,6 +21,8 @@ app.use(helmet());
 app.use(cors());
 
 app.use(morgan('combined'));
+
+app.use(express.static('search'))
 
 app.get('/', (req, res) => {
   res.send("hello");
@@ -102,6 +106,11 @@ app.get('/subredditlist', async(req, res) => {
   catch(err) {
     res.send("ERROR");
   }
+});
+
+app.get('/view', async(req, res) => {
+  const parent = path.resolve(__dirname, '..');
+  res.sendFile(path.join(parent + '/search/search.html'));
 });
 
 app.post('/reddit',  (req, res) => {
@@ -239,10 +248,18 @@ async function linkExists(url) {
 
 async function executeQuery(keyword, subReddit, sort, sortOrder, limit, offset) {
   let query = '';
-  if(keyword)
-     query = `SELECT * FROM DATA WHERE DATA LIKE '%${keyword}%' AND LINK LIKE '%${subReddit}%' ORDER BY ${sort} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`;
-  else
-    query = `SELECT * FROM DATA WHERE LINK LIKE '%${subReddit}%' ORDER BY ${sort} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`;
+  subReddit = subReddit.toLowerCase();
+  let keywordQuery = `DATA LIKE '%${keyword}%'`;
+  let subredditQuery = `LOWER(LINK) LIKE '%${subReddit}%'`;
+  let whereList = [];
+  let whereStr = '';
+  if(keyword && keyword !== ' ' && keyword !== '')
+    whereList.push(keywordQuery);
+  if(subReddit && subReddit !== 'all')
+    whereList.push(subredditQuery);
+  if(whereList.length > 0)
+    whereStr = ' WHERE ' + whereList.join(' AND ');
+  query = `SELECT LINK, DATA, SCORE, COMMENTS, LOWER( SUBSTR(SUBSTR(LINK,22,LENGTH(LINK)),1,INSTR(SUBSTR(LINK,22,LENGTH(LINK)),'/')-1)) AS SUBREDDIT FROM DATA ${whereStr} ORDER BY ${sort} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`;
   console.log(query);
   return await new Promise(function (resolve, reject) {
     db.all(query, function(err, rows) {
@@ -252,7 +269,7 @@ async function executeQuery(keyword, subReddit, sort, sortOrder, limit, offset) 
 }
 
 async function getSubredditList(){
-  const query = "SELECT DISTINCT SUBSTR(SUBSTR(LINK,22,LENGTH(LINK)),1,INSTR(SUBSTR(LINK,22,LENGTH(LINK)),'/')-1) AS SUBREDDIT FROM DATA";
+  const query = "SELECT DISTINCT LOWER(SUBSTR(SUBSTR(LINK,22,LENGTH(LINK)),1,INSTR(SUBSTR(LINK,22,LENGTH(LINK)),'/')-1)) AS SUBREDDIT FROM DATA";
   return await new Promise(function (resolve, reject) {
     db.all(query, function(err, rows) {
       resolve(rows);
