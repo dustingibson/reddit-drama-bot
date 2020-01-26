@@ -2,7 +2,7 @@ var baseAPI = "http://dustingibson.com/api/";
 
 function toDate(ts) {
     var date = new Date(ts * 1000);
-    var day = (date.getDate()+1).toString();
+    var day = (date.getDate()).toString();
     var month = (date.getMonth() + 1).toString();
     return  month + "/" + day + "/" + date.getFullYear();
 }
@@ -10,6 +10,7 @@ function toDate(ts) {
 $(document).ready( function () {
     $('#myTable').DataTable({
         autoWidth: false,
+        iDisplayLength: 50,
         columns: [
             {title: "LINK", fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
                 $(nTd).html("<a href='"+oData[0]+"'>LINK</a>");
