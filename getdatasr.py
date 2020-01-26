@@ -11,6 +11,6 @@ def callMethod(URL):
 SRs = open('sr.txt').readlines()
 
 for SR in SRs:
-    callMethod("http://localhost:3110/subreddit?name=" + SR.strip() + "&cat=top&time=week")
-    callMethod("http://localhost:3110/subreddit?name=" + SR.strip() + "&cat=top&time=today")
-    callMethod("http://localhost:3110/subreddit?name=" + SR.strip() + "&cat=controversial&time=today")
+    callMethod("http://dustingibson.com/api/subreddit?name=" + SR.strip() + "&cat=top&time=week")
+    callMethod("http://dustingibson.com/api/subreddit?name=" + SR.strip() + "&cat=top&time=today")
+    callMethod("http://dustingibson.com/api/subreddit?name=" + SR.strip() + "&cat=controversial&time=today")

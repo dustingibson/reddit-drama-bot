@@ -7,3 +7,4 @@ samples/*
 *.bat
 config.json
 sr.txt
+db.bin

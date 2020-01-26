@@ -125,6 +125,11 @@ app.post('/reddit',  (req, res) => {
   }
 });
 
+app.post('/insertMissingDates', async(req, res) => {
+  insertMissingDates();
+  res.send("OK");
+})
+
 app.listen(config.port, () => {
   console.log('listening on port ' + config.port);
 });
@@ -188,7 +193,7 @@ async function getRedditComments(url) {
             let count = naiveCountReplies(JSON.stringify(data));
             if( ogComment !== "[deleted]" && ogComment !== "[removed]" && (score <= config.threshold && count >= config.minCommentsWithThreshold) || (score <= config.thresholdWithComments && count >= config.minComments) ) { 
               links.push( comment.data.permalink );
-              await insertLinkToDB(url, "https://reddit.com" +  comment.data.permalink, ogComment, "RECORDED", score, count);
+              await insertLinkToDB(url, "https://reddit.com" +  comment.data.permalink, ogComment, "RECORDED", score, count, comment.data.created_utc, comment.data.subreddit);
             }
           }
         }
@@ -220,16 +225,34 @@ async function getCommentData(permaLink) {
   }
 }
 
-async function insertLinkToDB(srLink, link, data, status, score, comments) {
+async function insertMissingDates() {
+  let query = `SELECT * FROM DATA WHERE DATE IS NULL`;
+  db.all(query, async function(err, rows) {
+    rows.forEach( async (row) => {
+      const url = row.LINK + '.json';
+      const result = await fetch(url);
+      const response = await result.json(url);
+      const commentDate = response[1].data.children[0].data.created_utc;
+      console.log(response[1].data.children[0].data.created_utc);
+      const updateQuery = `UPDATE DATA SET DATE=${commentDate} WHERE ID=?`;
+      console.log(updateQuery + " " + row.ID);
+      db.run(updateQuery, [row.ID], function(err) {
+
+      });
+    });
+  });
+}
+
+async function insertLinkToDB(srLink, link, data, status, score, comments, date, sr) {
   console.log(comments);
   let error = false;
-  let query = `INSERT OR REPLACE INTO DATA ("LINK", "DATA", "STATUS", "DATALINK", "SCORE", "COMMENTS") VALUES (?, ?, ?, ?, ?, ?)`;
-  db.run(query, [link, data, status, srLink, score, comments], function(err) {
+  let query = `INSERT OR REPLACE INTO DATA ("LINK", "DATA", "STATUS", "DATALINK", "SCORE", "COMMENTS", "DATE", "SUBREDDIT") VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+  db.run(query, [link, data, status, srLink, score, comments, date, sr], function(err) {
     console.log("INSERTING...");
     error = true;
   });
   if(error) {
-      db.run(query, [link, "{}", status, srLink, score, comments], function(err) {
+      db.run(query, [link, "{}", status, srLink, score, comments, date, sr], function(err) {
         console.log("RETRYING INSERT...");
     });
   }
@@ -259,7 +282,7 @@ async function executeQuery(keyword, subReddit, sort, sortOrder, limit, offset) 
     whereList.push(subredditQuery);
   if(whereList.length > 0)
     whereStr = ' WHERE ' + whereList.join(' AND ');
-  query = `SELECT LINK, DATA, SCORE, COMMENTS, LOWER( SUBSTR(SUBSTR(LINK,22,LENGTH(LINK)),1,INSTR(SUBSTR(LINK,22,LENGTH(LINK)),'/')-1)) AS SUBREDDIT FROM DATA ${whereStr} ORDER BY ${sort} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`;
+  query = `SELECT * FROM DATA ${whereStr} ORDER BY ${sort} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`;
   console.log(query);
   return await new Promise(function (resolve, reject) {
     db.all(query, function(err, rows) {
@@ -269,7 +292,7 @@ async function executeQuery(keyword, subReddit, sort, sortOrder, limit, offset) 
 }
 
 async function getSubredditList(){
-  const query = "SELECT DISTINCT LOWER(SUBSTR(SUBSTR(LINK,22,LENGTH(LINK)),1,INSTR(SUBSTR(LINK,22,LENGTH(LINK)),'/')-1)) AS SUBREDDIT FROM DATA ORDER BY LOWER(SUBSTR(SUBSTR(LINK,22,LENGTH(LINK)),1,INSTR(SUBSTR(LINK,22,LENGTH(LINK)),'/')-1)) ASC";
+  const query = "SELECT DISTINCT LOWER(SUBREDDIT) FROM DATA ORDER BY SUBREDDIT ASC";
   return await new Promise(function (resolve, reject) {
     db.all(query, function(err, rows) {
       resolve(rows);
