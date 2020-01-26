@@ -49,8 +49,9 @@ app.get('/fetchcomments', async (req, res) => {
   const subreddit = req.query.subreddit;
   const keyword = req.query.keyword;
   const limit = req.query.limit;
+  const date = req.query.date;
   const offset = (req.query.page-1) * req.query.limit;
-  return res.send(await executeQuery(keyword, subreddit, sort, sortOrder, limit, offset));
+  return res.send(await executeQuery(keyword, subreddit, date, sort, sortOrder, limit, offset));
 });
 
 app.post('/postthread', async (req, res) => {
@@ -269,7 +270,7 @@ async function linkExists(url) {
   });
 }
 
-async function executeQuery(keyword, subReddit, sort, sortOrder, limit, offset) {
+async function executeQuery(keyword, subReddit, date, sort, sortOrder, limit, offset) {
   let query = '';
   subReddit = subReddit.toLowerCase();
   let keywordQuery = `DATA LIKE '%${keyword}%'`;
@@ -280,6 +281,13 @@ async function executeQuery(keyword, subReddit, sort, sortOrder, limit, offset) 
     whereList.push(keywordQuery);
   if(subReddit && subReddit !== 'all')
     whereList.push(subredditQuery);
+  if(date && date !== 'All')
+    if(date == 'WEEK') {
+      whereList.push("DATE >= strftime('%s', 'now') - 604800")
+    }
+    else if (date == 'MONTH') {
+      whereList.push("DATE >= strftime('%s', 'now') - 2628000")
+    }
   if(whereList.length > 0)
     whereStr = ' WHERE ' + whereList.join(' AND ');
   query = `SELECT * FROM DATA ${whereStr} ORDER BY ${sort} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`;
@@ -292,7 +300,7 @@ async function executeQuery(keyword, subReddit, sort, sortOrder, limit, offset) 
 }
 
 async function getSubredditList(){
-  const query = "SELECT DISTINCT LOWER(SUBREDDIT) FROM DATA ORDER BY SUBREDDIT ASC";
+  const query = "SELECT DISTINCT LOWER(SUBREDDIT) AS SUBREDDIT FROM DATA ORDER BY SUBREDDIT ASC";
   return await new Promise(function (resolve, reject) {
     db.all(query, function(err, rows) {
       resolve(rows);

@@ -16,6 +16,18 @@
                     <select class="form-control" id="subredditSearch" >
                         <option value="All">All Subreddits</option>
                     </select>
+                    Date:
+                    <select class="form-control" data-style="btn-primary" id="dateSearch" >
+                            <option value="All" selected>All</option>
+                            <option value="WEEK">This Week</option>
+                            <option value="MONTH">This Month</option>
+                    </select>
+                    Sort By:
+                    <select class="form-control" data-style="btn-primary" id="sortBySearch" >
+                            <option value="COMMENTS"># Replies</option>
+                            <option value="SCORE">Score</option>
+                            <option value="DATE">Date</option>
+                    </select>
                     Limit:
                     <select class="form-control" data-style="btn-primary" id="limitNumSearch">
                             <option value="25">25</option>
@@ -23,11 +35,6 @@
                             <option selected value="100">100</option>
                             <option value="150">150</option>
                             <option value="200">200</option>
-                    </select>
-                    Sort By:
-                    <select class="form-control" data-style="btn-primary" id="sortBySearch" >
-                            <option value="COMMENTS"># Replies</option>
-                            <option value="SCORE">Score</option>
                     </select>
                 </div>
 
