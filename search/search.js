@@ -1,4 +1,4 @@
-var baseAPI = "http://localhost:3110";
+var baseAPI = "http://dustingibson.com/api/";
 
 $(document).ready( function () {
     $('#myTable').DataTable({

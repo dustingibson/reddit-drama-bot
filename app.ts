@@ -269,7 +269,7 @@ async function executeQuery(keyword, subReddit, sort, sortOrder, limit, offset) 
 }
 
 async function getSubredditList(){
-  const query = "SELECT DISTINCT LOWER(SUBSTR(SUBSTR(LINK,22,LENGTH(LINK)),1,INSTR(SUBSTR(LINK,22,LENGTH(LINK)),'/')-1)) AS SUBREDDIT FROM DATA";
+  const query = "SELECT DISTINCT LOWER(SUBSTR(SUBSTR(LINK,22,LENGTH(LINK)),1,INSTR(SUBSTR(LINK,22,LENGTH(LINK)),'/')-1)) AS SUBREDDIT FROM DATA ORDER BY LOWER(SUBSTR(SUBSTR(LINK,22,LENGTH(LINK)),1,INSTR(SUBSTR(LINK,22,LENGTH(LINK)),'/')-1)) ASC";
   return await new Promise(function (resolve, reject) {
     db.all(query, function(err, rows) {
       resolve(rows);
