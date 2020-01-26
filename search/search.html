@@ -1,0 +1,36 @@
+<link rel="stylesheet" type="text/css" href="lib\jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="lib\bootstrap\css\bootstrap.min.css">
+<script type="text/javascript" charset="utf8" src="lib/jquery-3.4.1min.js"></script>
+<script type="text/javascript" charset="utf8" src="lib/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8" src="lib\bootstrap\js\bootstrap.min.js"></script>
+<script type="text/javascript" charset="utf8" src="search.js"></script>
+<form>
+    <label for="commentText">Comment Text</label>
+    <input type="text" class="form-control" id="commentTextSearch" aria-describedby="commentText">
+    <select class="form-control" data-style="btn-primary" id="subredditSearch" >
+        <option value="All">All</option>
+    </select>
+    <select class="form-control" data-style="btn-primary" id="limitNumSearch" >
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+    </select>
+    <select class="form-control" data-style="btn-primary" id="sortBySearch" >
+            <option value="COMMENTS"># Replies</option>
+            <option value="SCORE">Score</option>
+    </select>
+
+</form>
+<button onclick="fetchComments()">SEARCH</button></br>
+<table id="myTable" class="display">
+    <thead>
+        <tr>
+            <th>LINK</th>
+            <th>COMMENT</th>
+            <th>SCORE</th>
+            <th>REPLIES</th>
+        </tr>
+    </thead>
+    <tbody id="tdata">
+    </tbody>
+</table>

@@ -39,6 +39,16 @@ app.get('/authtest', (req, res) => {
   res.send("test");
 });
 
+app.get('/fetchcomments', async (req, res) => {
+  const sort = req.query.sort;
+  const sortOrder = req.query.sortOrder;
+  const subreddit = req.query.subreddit;
+  const keyword = req.query.keyword;
+  const limit = req.query.limit;
+  const offset = (req.query.page-1) * req.query.limit;
+  return res.send(await executeQuery(keyword, subreddit, sort, sortOrder, limit, offset));
+});
+
 app.post('/postthread', async (req, res) => {
   const query = "SELECT * FROM DATA WHERE STATUS='RECORDED' AND DATA <>'[removed]' AND DATA <> '[deleted]' ORDER BY RANDOM() DESC LIMIT 1";
   let data = {};
@@ -77,6 +87,17 @@ app.post('/subreddit', async (req, res) => {
     await getRedditList(`https://www.reddit.com/r/${req.query.name}/${req.query.cat}.json?t=${req.query.time}`);
     await getRedditList(`https://www.reddit.com/r/${req.query.name}/${req.query.cat}.json?t=${req.query.time}`);
     res.send("Pass");
+  }
+  catch(err) {
+    res.send("ERROR");
+  }
+});
+
+app.get('/subredditlist', async(req, res) => {
+  try {
+    getSubredditList().then( (result) => {
+      res.send(result);
+    })
   }
   catch(err) {
     res.send("ERROR");
@@ -214,6 +235,29 @@ async function linkExists(url) {
         resolve(false);
     });
   });
+}
+
+async function executeQuery(keyword, subReddit, sort, sortOrder, limit, offset) {
+  let query = '';
+  if(keyword)
+     query = `SELECT * FROM DATA WHERE DATA LIKE '%${keyword}%' AND LINK LIKE '%${subReddit}%' ORDER BY ${sort} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`;
+  else
+    query = `SELECT * FROM DATA WHERE LINK LIKE '%${subReddit}%' ORDER BY ${sort} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`;
+  console.log(query);
+  return await new Promise(function (resolve, reject) {
+    db.all(query, function(err, rows) {
+      resolve(rows);
+    });
+  })
+}
+
+async function getSubredditList(){
+  const query = "SELECT DISTINCT SUBSTR(SUBSTR(LINK,22,LENGTH(LINK)),1,INSTR(SUBSTR(LINK,22,LENGTH(LINK)),'/')-1) AS SUBREDDIT FROM DATA";
+  return await new Promise(function (resolve, reject) {
+    db.all(query, function(err, rows) {
+      resolve(rows);
+    });
+  })
 }
 
 async function getRedditList(url) {
