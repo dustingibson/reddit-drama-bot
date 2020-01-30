@@ -55,6 +55,9 @@ function fetchComments() {
         else if(orderCrit == "DATE") {
             $('#myTable').dataTable().fnSort([4,"desc"]);
         }
+        else if(orderCrit === "SCORE") {
+            $('#myTable').dataTable().fnSort([1,"desc"]);
+        }
         datatable.draw();
     });
 }
